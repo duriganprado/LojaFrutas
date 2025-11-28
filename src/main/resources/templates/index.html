@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Shop - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="glass rounded-2xl shadow-2xl p-12 w-full max-w-4xl">
+        <div class="text-center">
+            <div class="inline-block bg-white rounded-full p-6 mb-6">
+                <i class="fas fa-paw text-7xl text-indigo-600"></i>
+            </div>
+            <h1 class="text-5xl font-bold text-white mb-4">Pet Shop</h1>
+            <p class="text-xl text-indigo-100 mb-8">Sistema de Gestão e Adoção de Animais</p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                <a href="/login" class="bg-white text-indigo-600 font-bold py-4 px-8 rounded-lg hover:bg-opacity-90 transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Entrar
+                </a>
+                <a href="/register" class="bg-indigo-600 text-white font-bold py-4 px-8 rounded-lg hover:bg-indigo-700 transition duration-200 flex items-center justify-center">
+                    <i class="fas fa-user-plus mr-2"></i>Cadastrar-se
+                </a>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+                <div class="glass rounded-xl p-6">
+                    <i class="fas fa-dog text-4xl text-white mb-4"></i>
+                    <h3 class="text-xl font-bold text-white mb-2">Gestão de Animais</h3>
+                    <p class="text-indigo-100">Cadastre e gerencie animais</p>
+                </div>
+                <div class="glass rounded-xl p-6">
+                    <i class="fas fa-heart text-4xl text-white mb-4"></i>
+                    <h3 class="text-xl font-bold text-white mb-2">Adoção Responsável</h3>
+                    <p class="text-indigo-100">Encontre seu novo amigo</p>
+                </div>
+                <div class="glass rounded-xl p-6">
+                    <i class="fas fa-clipboard-list text-4xl text-white mb-4"></i>
+                    <h3 class="text-xl font-bold text-white mb-2">Formulários</h3>
+                    <p class="text-indigo-100">Processo de adoção fácil</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

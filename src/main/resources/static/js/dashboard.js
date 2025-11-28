@@ -108,7 +108,7 @@ function displayAnimals(animals) {
     }
     
     grid.innerHTML = animals.map(animal => `
-        <div class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300">
+        <div class="glass-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300">
             <div class="h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center overflow-hidden">
                 ${animal.fotoUrl 
                     ? `<img src="${animal.fotoUrl}" alt="${animal.nome}" class="w-full h-full object-cover">` 
@@ -128,8 +128,8 @@ function displayAnimals(animals) {
                     ${animal.vacinado ? '<span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"><i class="fas fa-syringe mr-1"></i>Vacinado</span>' : ''}
                     ${animal.castrado ? '<span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"><i class="fas fa-cut mr-1"></i>Castrado</span>' : ''}
                     ${animal.disponivelAdocao 
-                        ? '<span class="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full"><i class="fas fa-check mr-1"></i>Disponível</span>' 
-                        : '<span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"><i class="fas fa-times mr-1"></i>Adotado</span>'}
+                        ? '<span class="px-2 py-1 glass text-purple-700 text-xs rounded-full"><i class="fas fa-check mr-1"></i>Dispon\u00edvel</span>' 
+                        : '<span class="px-2 py-1 glass text-gray-700 text-xs rounded-full"><i class="fas fa-times mr-1"></i>Adotado</span>'}
                 </div>
                 <div class="flex gap-2">
                     <button onclick="editAnimal(${animal.id})" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm transition">
@@ -328,7 +328,7 @@ async function loadAnimaisDisponiveis() {
     }
     
     grid.innerHTML = disponiveis.map(animal => `
-        <div class="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300">
+        <div class="glass-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300">
             <div class="h-48 bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center overflow-hidden">
                 ${animal.fotoUrl 
                     ? `<img src="${animal.fotoUrl}" alt="${animal.nome}" class="w-full h-full object-cover">` 
@@ -441,24 +441,24 @@ function displayFormularios() {
             'PENDENTE': 'bg-yellow-100 text-yellow-800',
             'APROVADO': 'bg-green-100 text-green-800',
             'RECUSADO': 'bg-red-100 text-red-800',
-            'CANCELADO': 'bg-gray-100 text-gray-800'
+            'CANCELADO': 'glass text-gray-800'
         };
         
         const dataSolicitacao = form.dataSolicitacao ? new Date(form.dataSolicitacao).toLocaleDateString('pt-BR') : 'N/A';
         
         return `
-            <div class="bg-white rounded-xl p-6 shadow-lg">
+            <div class="glass-card rounded-xl p-6 shadow-lg">
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <h3 class="text-xl font-bold text-gray-800">${form.animal ? form.animal.nome : 'Animal não encontrado'}</h3>
                         <p class="text-gray-600">${form.animal ? form.animal.especie : ''} ${form.animal && form.animal.raca ? `- ${form.animal.raca}` : ''}</p>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusColors[form.status] || 'bg-gray-100 text-gray-800'}">
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusColors[form.status] || 'glass text-gray-800'}">
                         ${form.status}
                     </span>
                 </div>
                 <div class="text-sm text-gray-600 space-y-2">
-                    <p><i class="fas fa-calendar mr-2 text-indigo-600"></i><strong>Data:</strong> ${dataSolicitacao}</p>
+                    <p><i class="fas fa-calendar mr-2"></i><strong>Data:</strong> ${dataSolicitacao}</p>
                     <p><i class="fas fa-map-marker-alt mr-2 text-red-600"></i><strong>Endereço:</strong> ${form.endereco || 'N/A'}</p>
                     ${form.tipoResidencia ? `<p><i class="fas fa-home mr-2 text-purple-600"></i><strong>Residência:</strong> ${form.tipoResidencia}</p>` : ''}
                     ${form.motivoAdocao ? `<p><i class="fas fa-heart mr-2 text-pink-600"></i><strong>Motivo:</strong> ${form.motivoAdocao}</p>` : ''}

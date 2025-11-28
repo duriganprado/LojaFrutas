@@ -44,9 +44,3 @@ if (urlParams.get('logout')) {
     const errorAlert = document.getElementById('errorAlert');
     errorAlert.className = 'bg-green-500 bg-opacity-20 border border-green-500 text-white px-4 py-3 rounded-lg';
 }
-
-// Auto-refresh CSRF token on page load if coming from redirect
-if (document.referrer && document.referrer.includes('/login') && !urlParams.get('error') && !urlParams.get('logout')) {
-    console.log('Refreshing page to get new CSRF token');
-    window.location.replace('/login');
-}

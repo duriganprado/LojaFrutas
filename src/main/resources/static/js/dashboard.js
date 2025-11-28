@@ -37,8 +37,25 @@ async function checkAuth() {
 }
 
 // Logout
-function logout() {
-    window.location.href = '/logout';
+async function logout() {
+    try {
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || 
+                         document.querySelector('input[name="_csrf"]')?.value;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || '_csrf';
+        
+        const response = await fetch('/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                [csrfHeader]: csrfToken
+            }
+        });
+        
+        window.location.href = '/login?logout=true';
+    } catch (error) {
+        console.error('Logout error:', error);
+        window.location.href = '/login';
+    }
 }
 
 // Tabs functionality
@@ -115,21 +132,21 @@ function displayAnimals(animals) {
                     : `<i class="fas fa-${getAnimalIconClass(animal.especie)} text-6xl text-indigo-300"></i>`
                 }
             </div>
-            <div class="p-4">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">${animal.nome}</h3>
-                <div class="text-sm text-gray-600 space-y-1 mb-3">
+            <div class="p-4 bg-white bg-opacity-60">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">${animal.nome}</h3>
+                <div class="text-sm text-gray-800 space-y-1 mb-3">
                     <p><i class="fas fa-paw mr-2 text-indigo-600"></i><strong>Espécie:</strong> ${animal.especie}</p>
                     ${animal.raca ? `<p><i class="fas fa-dna mr-2 text-purple-600"></i><strong>Raça:</strong> ${animal.raca}</p>` : ''}
                     <p><i class="fas fa-birthday-cake mr-2 text-pink-600"></i><strong>Idade:</strong> ${animal.idade} ${animal.idade === 1 ? 'ano' : 'anos'}</p>
                     ${animal.sexo ? `<p><i class="fas fa-venus-mars mr-2 text-blue-600"></i><strong>Sexo:</strong> ${animal.sexo}</p>` : ''}
                 </div>
-                ${animal.descricao ? `<p class="text-sm text-gray-500 mb-3 line-clamp-2">${animal.descricao}</p>` : ''}
+                ${animal.descricao ? `<p class="text-sm text-gray-700 mb-3 line-clamp-2">${animal.descricao}</p>` : ''}
                 <div class="flex flex-wrap gap-2 mb-4">
                     ${animal.vacinado ? '<span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"><i class="fas fa-syringe mr-1"></i>Vacinado</span>' : ''}
                     ${animal.castrado ? '<span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"><i class="fas fa-cut mr-1"></i>Castrado</span>' : ''}
                     ${animal.disponivelAdocao 
-                        ? '<span class="px-2 py-1 glass text-purple-700 text-xs rounded-full"><i class="fas fa-check mr-1"></i>Dispon\u00edvel</span>' 
-                        : '<span class="px-2 py-1 glass text-gray-700 text-xs rounded-full"><i class="fas fa-times mr-1"></i>Adotado</span>'}
+                        ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-semibold"><i class="fas fa-check mr-1"></i>Disponível</span>' 
+                        : '<span class="px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded-full font-semibold"><i class="fas fa-times mr-1"></i>Adotado</span>'}
                 </div>
                 <div class="flex gap-2">
                     <button onclick="editAnimal(${animal.id})" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm transition">
@@ -335,13 +352,13 @@ async function loadAnimaisDisponiveis() {
                     : `<i class="fas fa-${getAnimalIconClass(animal.especie)} text-6xl text-pink-300"></i>`
                 }
             </div>
-            <div class="p-4">
-                <h3 class="text-xl font-bold text-gray-800 mb-2">${animal.nome}</h3>
-                <div class="text-sm text-gray-600 space-y-1 mb-3">
+            <div class="p-4 bg-white bg-opacity-60">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">${animal.nome}</h3>
+                <div class="text-sm text-gray-800 space-y-1 mb-3">
                     <p><i class="fas fa-paw mr-2 text-pink-600"></i>${animal.especie}${animal.raca ? ` - ${animal.raca}` : ''}</p>
                     <p><i class="fas fa-birthday-cake mr-2 text-red-600"></i>${animal.idade} ${animal.idade === 1 ? 'ano' : 'anos'}</p>
                 </div>
-                ${animal.descricao ? `<p class="text-sm text-gray-500 mb-3">${animal.descricao}</p>` : ''}
+                ${animal.descricao ? `<p class="text-sm text-gray-700 mb-3">${animal.descricao}</p>` : ''}
                 <button onclick="openAdocaoModal(${animal.id})" 
                     class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg font-semibold transition">
                     <i class="fas fa-heart mr-2"></i>Adotar
@@ -448,16 +465,16 @@ function displayFormularios() {
         
         return `
             <div class="glass-card rounded-xl p-6 shadow-lg">
-                <div class="flex justify-between items-start mb-4">
+                <div class="flex justify-between items-start mb-4 bg-white bg-opacity-50 p-3 rounded-lg">
                     <div>
-                        <h3 class="text-xl font-bold text-gray-800">${form.animal ? form.animal.nome : 'Animal não encontrado'}</h3>
-                        <p class="text-gray-600">${form.animal ? form.animal.especie : ''} ${form.animal && form.animal.raca ? `- ${form.animal.raca}` : ''}</p>
+                        <h3 class="text-xl font-bold text-gray-900">${form.animal ? form.animal.nome : 'Animal não encontrado'}</h3>
+                        <p class="text-gray-800">${form.animal ? form.animal.especie : ''} ${form.animal && form.animal.raca ? `- ${form.animal.raca}` : ''}</p>
                     </div>
                     <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusColors[form.status] || 'glass text-gray-800'}">
                         ${form.status}
                     </span>
                 </div>
-                <div class="text-sm text-gray-600 space-y-2">
+                <div class="text-sm text-gray-800 space-y-2 bg-white bg-opacity-40 p-3 rounded-lg">
                     <p><i class="fas fa-calendar mr-2"></i><strong>Data:</strong> ${dataSolicitacao}</p>
                     <p><i class="fas fa-map-marker-alt mr-2 text-red-600"></i><strong>Endereço:</strong> ${form.endereco || 'N/A'}</p>
                     ${form.tipoResidencia ? `<p><i class="fas fa-home mr-2 text-purple-600"></i><strong>Residência:</strong> ${form.tipoResidencia}</p>` : ''}

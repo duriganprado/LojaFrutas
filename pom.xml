@@ -12,11 +12,11 @@
         <relativePath/>
     </parent>
     
-    <groupId>com.petshop</groupId>
-    <artifactId>petshop-crud</artifactId>
+    <groupId>com.fruta</groupId>
+    <artifactId>fruta-shop</artifactId>
     <version>1.0.0</version>
-    <name>PetShop CRUD</name>
-    <description>Sistema de gestão de Pet Shop com autenticação</description>
+    <name>Fruta Shop</name>
+    <description>Sistema de gestão de Loja de Frutas com autenticação e gerenciamento de pedidos</description>
     
     <properties>
         <java.version>17</java.version>

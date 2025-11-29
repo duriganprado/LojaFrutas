@@ -5,67 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Pet Shop - Login</title>
+    <title>Fruta Shop - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        body {
+            background: linear-gradient(135deg, #FF6B35 0%, #FFD83D 100%);
+            min-height: 100vh;
         }
         .glass {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+            border-color: #FF6B35;
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
-    <div class="glass rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <div class="text-center mb-8">
-            <div class="inline-block bg-white rounded-full p-4 mb-4">
-                <i class="fas fa-paw text-5xl text-indigo-600"></i>
-            </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Pet Shop</h1>
-            <p class="text-indigo-100">Sistema de Adoção</p>
-        </div>
-        
-        <form id="loginForm" method="POST" action="/login" class="space-y-6">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            
-            <div id="errorAlert" class="hidden bg-red-500 bg-opacity-20 border border-red-500 text-white px-4 py-3 rounded-lg">
-                <span id="errorMessage"></span>
+<body>
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="glass rounded-3xl shadow-2xl p-10 w-full max-w-md">
+            <!-- Header -->
+            <div class="text-center mb-10">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-yellow-300 mb-6 shadow-lg">
+                    <i class="fas fa-apple-alt text-4xl text-white"></i>
+                </div>
+                <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-yellow-500 mb-2">Fruta Shop</h1>
+                <p class="text-gray-600 text-lg">Bem-vindo de volta!</p>
             </div>
             
-            <div>
-                <label for="email" class="block text-white font-medium mb-2">
-                    <i class="fas fa-envelope mr-2"></i>Email
-                </label>
-                <input type="email" id="email" name="username" required 
-                    class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                    placeholder="seu@email.com">
-            </div>
+            <!-- Login Form -->
+            <form id="loginForm" method="POST" action="/login" class="space-y-6">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                
+                <!-- Error Alert -->
+                <div id="errorAlert" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-4 rounded">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-3"></i>
+                        <span id="errorMessage"></span>
+                    </div>
+                </div>
+                
+                <!-- Email Input -->
+                <div>
+                    <label for="email" class="block text-gray-800 font-bold mb-3">
+                        <i class="fas fa-envelope text-orange-500 mr-2"></i>Seu Email
+                    </label>
+                    <input type="email" id="email" name="username" required 
+                        class="w-full px-5 py-3 rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 input-focus bg-white"
+                        placeholder="email@exemplo.com">
+                </div>
+                
+                <!-- Password Input -->
+                <div>
+                    <label for="senha" class="block text-gray-800 font-bold mb-3">
+                        <i class="fas fa-lock text-orange-500 mr-2"></i>Senha
+                    </label>
+                    <input type="password" id="senha" name="password" required 
+                        class="w-full px-5 py-3 rounded-xl border-2 border-gray-200 text-gray-800 placeholder-gray-400 input-focus bg-white"
+                        placeholder="••••••••">
+                </div>
+                
+                <!-- Submit Button -->
+                <button type="submit" 
+                    class="w-full bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold py-4 px-4 rounded-xl hover:shadow-lg hover:scale-105 transition duration-200 flex items-center justify-center text-lg">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Entrar
+                </button>
+                
+                <!-- Register Link -->
+                <div class="text-center pt-6 border-t-2 border-gray-200">
+                    <p class="text-gray-700">
+                        Não tem uma conta? 
+                        <a href="/register" class="font-bold text-orange-600 hover:text-orange-700">Cadastre-se aqui</a>
+                    </p>
+                </div>
+            </form>
             
-            <div>
-                <label for="senha" class="block text-white font-medium mb-2">
-                    <i class="fas fa-lock mr-2"></i>Senha
-                </label>
-                <input type="password" id="senha" name="password" required 
-                    class="w-full px-4 py-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 text-white placeholder-indigo-200 focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent"
-                    placeholder="••••••••">
-            </div>
-            
-            <button type="submit" 
-                class="w-full bg-white text-indigo-600 font-bold py-3 px-4 rounded-lg hover:bg-opacity-90 transition duration-200 flex items-center justify-center">
-                <i class="fas fa-sign-in-alt mr-2"></i>Entrar
-            </button>
-            
-            <div class="text-center">
-                <p class="text-white">
-                    Não tem uma conta? 
-                    <a href="/register" class="font-bold hover:underline">Registrar-se</a>
+            <!-- Footer Info -->
+            <div class="mt-8 pt-8 border-t-2 border-gray-200 text-center">
+                <p class="text-sm text-gray-600 mb-3">Para testar, use:</p>
+                <p class="text-xs text-gray-500">
+                    <strong>Email:</strong> admin@frutashop.com<br>
+                    <strong>Senha:</strong> admin123
                 </p>
             </div>
-        </form>
+        </div>
     </div>
     
     <script src="/js/login.js"></script>

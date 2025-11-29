@@ -5,313 +5,494 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Pet Shop - Dashboard</title>
+    <title>Fruta Shop - Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-image: 
-                linear-gradient(135deg, rgba(102, 126, 234, 0.90) 0%, rgba(118, 75, 162, 0.90) 100%),
-                url('/images/fundopet.png');
-            background-size: cover, 400px 300px;
-            background-position: center, center;
-            background-repeat: no-repeat, repeat;
-            background-attachment: fixed, fixed;
+        body {
+            background: linear-gradient(135deg, #FFF5E6 0%, #FFF9F0 100%);
+            min-height: 100vh;
         }
         
-        @media (max-width: 768px) {
-            .gradient-bg {
-                background-size: cover, 200px 200px;
-            }
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, #E8670F 0%, #D85A06 100%);
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            position: fixed;
+            left: 0;
+            top: 60px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
+            z-index: 40;
+            padding: 12px 0;
         }
         
-        @media (max-width: 480px) {
-            .gradient-bg {
-                background-size: cover, 150px 150px;
-            }
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
         }
         
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-        }
-        
-        .glass-white {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-        }
-        
-        .glass-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-        }
-        
-        /* Estilo para select dropdown */
-        select option {
-            background: rgba(102, 126, 234, 0.95);
-            color: white;
-        }
-        
-        /* Tab ativo */
-        .tab-btn.active {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            color: white;
-        }
-        
-        .tab-btn:not(.active) {
+        .sidebar::-webkit-scrollbar-track {
             background: transparent;
-            color: rgba(255, 255, 255, 0.7);
         }
         
-        .tab-btn:not(.active):hover {
-            background: rgba(255, 255, 255, 0.1);
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 11px 16px;
+            color: rgba(255,255,255,0.85);
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            gap: 12px;
+            margin: 0 6px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .nav-item i {
+            font-size: 18px;
+            min-width: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255,255,255,0.15);
+            color: #FFFFFF;
+            transform: translateX(4px);
+        }
+        
+        .nav-item.active {
+            background: rgba(255,255,255,0.25);
+            border-left-color: #FFFFFF;
             color: white;
+            font-weight: 600;
+        }
+        
+        .nav-item.active i {
+            transform: scale(1.1);
+        }
+        
+        .nav-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: rgba(255,255,255,0.6);
+            padding: 12px 16px 6px 16px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        
+        .nav-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.15);
+            margin: 8px 10px;
+        }
+        
+        .main-content {
+            margin-left: 260px;
+            padding-top: 5px;
+        }
+        
+        .section {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Content Cards */
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #E8EAED;
+        }
+        
+        .content-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #E8EAED;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .content-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #202124;
+        }
+        
+        .content-header i {
+            font-size: 20px;
+            margin-right: 8px;
+            color: #E8670F;
+        }
+        
+        .content-body {
+            padding: 16px 20px;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #E8670F 0%, #D85A06 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(232, 103, 15, 0.3);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                top: 0;
+                margin-top: 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                padding: 8px 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding-top: 0;
+            }
+            
+            .nav-item {
+                display: inline-flex;
+                padding: 10px 12px;
+                margin: 0 4px;
+                border-left: 0;
+                border-bottom: 3px solid transparent;
+                border-radius: 0;
+            }
+            
+            .nav-item:hover {
+                transform: none;
+            }
+            
+            .nav-item.active {
+                border-left: 0;
+                border-bottom: 3px solid white;
+            }
+            
+            .nav-label {
+                display: none;
+            }
+            
+            .nav-divider {
+                display: none;
+            }
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen">
+<body>
     <!-- Header -->
-    <header class="bg-white bg-opacity-5 backdrop-blur-md border-b border-white border-opacity-20 sticky top-0 z-50">
-        <div class="container mx-auto px-4 py-4">
+    <header class="bg-white shadow-sm sticky top-0 z-50 border-b-4 border-orange-600">
+        <div class="px-6 py-3">
             <div class="flex justify-between items-center">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-paw text-3xl text-white"></i>
-                    <h1 class="text-2xl font-bold text-white">Pet Shop</h1>
+                    <div class="bg-gradient-to-br from-orange-600 to-orange-500 p-2 rounded-lg">
+                        <i class="fas fa-apple-alt text-2xl text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900">Fruta Shop</h1>
+                        <p class="text-xs text-orange-600 font-medium">Gerenciador de Pedidos</p>
+                    </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span id="userNameDisplay" class="text-white font-medium"></span>
-                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200">
-                        <i class="fas fa-sign-out-alt mr-2"></i>Sair
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-br from-orange-600 to-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                            <i class="fas fa-user text-xs"></i>
+                        </div>
+                        <span id="userNameDisplay" class="text-sm text-gray-700 font-medium"></span>
+                    </div>
+                    <button onclick="logout()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition duration-200 text-sm font-medium">
+                        <i class="fas fa-sign-out-alt mr-1"></i>Sair
                     </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <div class="container mx-auto px-4 py-8">
-        <!-- Tabs Navigation -->
-        <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-2 mb-6 flex flex-wrap gap-2">
-            <button class="tab-btn active flex-1 min-w-[150px] px-6 py-3 rounded-lg font-semibold transition duration-200" data-tab="animais">
-                <i class="fas fa-dog mr-2"></i>Animais
-            </button>
-            <button class="tab-btn flex-1 min-w-[150px] px-6 py-3 rounded-lg font-semibold transition duration-200" data-tab="adocao">
-                <i class="fas fa-heart mr-2"></i>Adoção
-            </button>
-            <button class="tab-btn flex-1 min-w-[150px] px-6 py-3 rounded-lg font-semibold transition duration-200" data-tab="formularios">
-                <i class="fas fa-clipboard-list mr-2"></i>Formulários
-            </button>
-        </div>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <nav>
+            <div class="nav-label">Menu</div>
+            
+            <div class="nav-item active" data-section="frutas">
+                <i class="fas fa-leaf"></i>
+                <span>Gerenciar Frutas</span>
+            </div>
+            
+            <div class="nav-item" data-section="catalogo">
+                <i class="fas fa-shopping-basket"></i>
+                <span>Catálogo</span>
+            </div>
+            
+            <div class="nav-item" data-section="pedidos">
+                <i class="fas fa-box-open"></i>
+                <span>Meus Pedidos</span>
+            </div>
+            
+            <div class="nav-divider"></div>
+            
+            <div class="nav-label">Conta</div>
+            
+            <div class="nav-item" onclick="logout()" style="cursor: pointer;">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair</span>
+            </div>
+        </nav>
+    </aside>
 
-        <!-- Tab Content -->
-        <div class="tab-content">
-            <!-- Animais Tab -->
-            <div class="tab-pane active" id="animais-tab">
-                <div class="bg-white bg-opacity-5 backdrop-blur-md rounded-xl p-6 border border-white border-opacity-20">
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container mx-auto px-4 py-8">
+            <!-- Frutas Tab -->
+            <div class="section hidden" id="frutas-section">
+                <div class="bg-white rounded-lg shadow-md p-6">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                        <h2 class="text-2xl font-bold text-white">
-                            <i class="fas fa-dog mr-2"></i>Gerenciar Animais
+                        <h2 class="text-2xl font-bold text-gray-900">
+                            <i class="fas fa-leaf mr-2 text-green-600"></i>Gerenciar Frutas
                         </h2>
-                        <button onclick="openAnimalModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
-                            <i class="fas fa-plus mr-2"></i>Adicionar Animal
+                        <button onclick="openFrutaModal()" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>Adicionar Fruta
                         </button>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <input type="text" id="searchAnimal" placeholder="🔍 Buscar por nome..." 
-                            class="px-4 py-3 rounded-lg glass-white text-white placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-white">
-                        <select id="filterEspecie" 
-                            class="px-4 py-3 rounded-lg glass-white text-white focus:outline-none focus:ring-2 focus:ring-white appearance-none cursor-pointer">
-                            <option value="" class="bg-indigo-600 text-white">Todas as Espécies</option>
-                            <option value="Cachorro" class="bg-indigo-600 text-white">🐕 Cachorro</option>
-                            <option value="Gato" class="bg-indigo-600 text-white">🐈 Gato</option>
-                            <option value="Pássaro" class="bg-indigo-600 text-white">🦜 Pássaro</option>
-                            <option value="Coelho" class="bg-indigo-600 text-white">🐇 Coelho</option>
-                            <option value="Outro" class="bg-indigo-600 text-white">🐾 Outro</option>
+                        <input type="text" id="searchFruta" placeholder="🔍 Buscar por nome..." 
+                            class="px-4 py-3 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500">
+                        <select id="filterCategoria" 
+                            class="px-4 py-3 rounded-lg border-2 border-gray-200 text-gray-900 focus:outline-none focus:border-orange-500 cursor-pointer">
+                            <option value="">Todas as Categorias</option>
+                            <option value="Maçã">🍎 Maçã</option>
+                            <option value="Banana">🍌 Banana</option>
+                            <option value="Morango">🍓 Morango</option>
+                            <option value="Laranja">🍊 Laranja</option>
+                            <option value="Uva">🍇 Uva</option>
                         </select>
                     </div>
                     
-                    <div id="animalsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    <div id="frutasGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
                 </div>
             </div>
 
-            <!-- Adoção Tab -->
-            <div class="tab-pane hidden" id="adocao-tab">
-                <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-6 border border-white border-opacity-20">
-                    <h2 class="text-2xl font-bold text-white mb-6">
-                        <i class="fas fa-heart mr-2"></i>Animais para Adoção
+            <!-- Catálogo Tab (Para Comprar) -->
+            <div class="section hidden" id="catalogo-section">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-shopping-basket mr-2 text-orange-600"></i>Catálogo - Compre Frutas
                     </h2>
-                    <div id="adocaoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <input type="text" id="searchFrutaCatalogo" placeholder="🔍 Buscar por nome..." 
+                            class="px-4 py-3 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500">
+                        <select id="filterCategoriaCatalogo" 
+                            class="px-4 py-3 rounded-lg border-2 border-gray-200 text-gray-900 focus:outline-none focus:border-orange-500 cursor-pointer">
+                            <option value="">Todas as Categorias</option>
+                            <option value="Maçã">🍎 Maçã</option>
+                            <option value="Banana">🍌 Banana</option>
+                            <option value="Morango">🍓 Morango</option>
+                            <option value="Laranja">🍊 Laranja</option>
+                            <option value="Uva">🍇 Uva</option>
+                        </select>
+                    </div>
+                    
+                    <div id="catalogoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
                 </div>
             </div>
 
-            <!-- Formulários Tab -->
-            <div class="tab-pane hidden" id="formularios-tab">
-                <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-xl p-6 border border-white border-opacity-20">
-                    <h2 class="text-2xl font-bold text-white mb-6">
-                        <i class="fas fa-clipboard-list mr-2"></i>Meus Formulários de Adoção
+            <!-- Pedidos Tab -->
+            <div class="section hidden" id="pedidos-section">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                        <i class="fas fa-shopping-cart mr-2 text-orange-600"></i>Meus Pedidos
                     </h2>
-                    <div id="formulariosLista" class="space-y-4"></div>
+                    <div id="pedidosLista" class="space-y-4"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal - Animal -->
-    <div id="animalModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-t-2xl">
+    <!-- Modal - Fruta -->
+    <div id="frutaModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="bg-gradient-to-r from-orange-600 to-yellow-500 p-6 rounded-t-2xl">
                 <div class="flex justify-between items-center">
-                    <h2 id="modalTitle" class="text-2xl font-bold text-white">Adicionar Animal</h2>
-                    <button onclick="closeAnimalModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full w-10 h-10 flex items-center justify-center transition">
+                    <h2 id="modalTitle" class="text-2xl font-bold text-white">Adicionar Fruta</h2>
+                    <button onclick="closeFrutaModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full w-10 h-10 flex items-center justify-center transition">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
             
-            <form id="animalForm" class="p-6 space-y-4">
-                <input type="hidden" id="animalId">
+            <form id="frutaForm" class="p-6 space-y-4">
+                <input type="hidden" id="frutaId">
                 
-                <!-- Image Upload -->
-                <div class="mb-4">
-                    <label class="block text-gray-800 font-semibold mb-2">
-                        <i class="fas fa-image mr-2"></i>Foto do Animal
-                    </label>
-                    <div class="flex flex-col items-center space-y-4">
-                        <div id="imagePreview" class="w-full h-48 glass rounded-lg flex items-center justify-center overflow-hidden">
-                            <i class="fas fa-paw text-6xl text-white text-opacity-50"></i>
-                        </div>
-                        <input type="file" id="animalFoto" accept="image/*" class="hidden">
-                        <button type="button" onclick="document.getElementById('animalFoto').click()" 
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition">
-                            <i class="fas fa-upload mr-2"></i>Escolher Foto
-                        </button>
+                <!-- Image Preview -->
+                <div class="border-2 border-dashed border-orange-300 rounded-lg p-4 text-center bg-orange-50">
+                    <div id="imagePreview" class="h-40 flex items-center justify-center">
+                        <i class="fas fa-apple-alt text-6xl text-orange-300"></i>
                     </div>
+                    <label for="frutaFoto" class="mt-4 inline-block bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg cursor-pointer transition">
+                        <i class="fas fa-upload mr-2"></i>Escolher Imagem
+                    </label>
+                    <input type="file" id="frutaFoto" accept="image/*" class="hidden">
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="animalNome" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-signature mr-2"></i>Nome *
+                        <label for="frutaNome" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-signature mr-2 text-orange-600"></i>Nome *
                         </label>
-                        <input type="text" id="animalNome" required 
-                            class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
-                            placeholder="Rex">
+                        <input type="text" id="frutaNome" required 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                            placeholder="Maçã Fuji">
                     </div>
                     
                     <div>
-                        <label for="animalEspecie" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-paw mr-2"></i>Espécie *
+                        <label for="frutaCategoria" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-tags mr-2 text-orange-600"></i>Categoria *
                         </label>
-                        <select id="animalEspecie" required 
-                            class="w-full px-4 py-2 glass rounded-lg text-white placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <select id="frutaCategoria" required 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 focus:outline-none focus:border-orange-500">
                             <option value="">Selecione...</option>
-                            <option value="Cachorro">Cachorro</option>
-                            <option value="Gato">Gato</option>
-                            <option value="Pássaro">Pássaro</option>
-                            <option value="Coelho">Coelho</option>
-                            <option value="Outro">Outro</option>
+                            <option value="Maçã">Maçã</option>
+                            <option value="Banana">Banana</option>
+                            <option value="Morango">Morango</option>
+                            <option value="Laranja">Laranja</option>
+                            <option value="Uva">Uva</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="animalRaca" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-dna mr-2"></i>Raça
+                        <label for="frutaPreco" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-dollar-sign mr-2 text-yellow-600"></i>Preço (R$) *
                         </label>
-                        <input type="text" id="animalRaca" 
-                            class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
-                            placeholder="Vira-lata">
+                        <input type="number" id="frutaPreco" required step="0.01" min="0" 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                            placeholder="5.50">
                     </div>
                     
                     <div>
-                        <label for="animalIdade" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-birthday-cake mr-2"></i>Idade (anos) *
+                        <label for="frutaEstoque" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-box mr-2 text-orange-600"></i>Estoque (Kg) *
                         </label>
-                        <input type="number" id="animalIdade" required min="0" 
-                            class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
-                            placeholder="2">
+                        <input type="number" id="frutaEstoque" required min="0" 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                            placeholder="100">
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label for="animalSexo" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-venus-mars mr-2"></i>Sexo
+                        <label for="frutaCor" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-palette mr-2 text-red-600"></i>Cor
                         </label>
-                        <select id="animalSexo" 
-                            class="w-full px-4 py-2 glass rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+                        <input type="text" id="frutaCor" 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                            placeholder="Vermelho">
+                    </div>
+                    
+                    <div>
+                        <label for="frutaSabor" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-smile mr-2 text-pink-600"></i>Sabor
+                        </label>
+                        <select id="frutaSabor" 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 focus:outline-none focus:border-orange-500">
                             <option value="">Selecione...</option>
-                            <option value="Macho">Macho</option>
-                            <option value="Fêmea">Fêmea</option>
+                            <option value="Doce">Doce</option>
+                            <option value="Ácido">Ácido</option>
+                            <option value="Neutro">Neutro</option>
                         </select>
                     </div>
                     
                     <div>
-                        <label for="animalPorte" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-weight mr-2"></i>Porte
+                        <label for="frutaOrigem" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-globe mr-2 text-blue-600"></i>Origem
                         </label>
-                        <select id="animalPorte" 
-                            class="w-full px-4 py-2 glass rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
-                            <option value="">Selecione...</option>
-                            <option value="Pequeno">Pequeno</option>
-                            <option value="Médio">Médio</option>
-                            <option value="Grande">Grande</option>
-                        </select>
+                        <input type="text" id="frutaOrigem" 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                            placeholder="Brasil">
                     </div>
-                    
-                    <div>
-                        <label for="animalCor" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-palette mr-2"></i>Cor
-                        </label>
-                        <input type="text" id="animalCor" 
-                            class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
-                            placeholder="Marrom">
-                    </div>
+                </div>
+
+                <div>
+                    <label for="frutaUnidade" class="block text-gray-800 font-semibold mb-2">
+                        <i class="fas fa-ruler mr-2 text-purple-600"></i>Unidade de Medida
+                    </label>
+                    <input type="text" id="frutaUnidade" 
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                        placeholder="Kg">
                 </div>
                 
                 <div>
-                    <label for="animalDescricao" class="block text-gray-800 font-semibold mb-2">
-                        <i class="fas fa-align-left mr-2"></i>Descrição
+                    <label for="frutaDescricao" class="block text-gray-800 font-semibold mb-2">
+                        <i class="fas fa-align-left mr-2 text-gray-600"></i>Descrição
                     </label>
-                    <textarea id="animalDescricao" rows="3" 
-                        class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-indigo-500 focus:border-transparent" 
-                        placeholder="Descreva o animal..."></textarea>
+                    <textarea id="frutaDescricao" rows="3" 
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                        placeholder="Descreva a fruta..."></textarea>
                 </div>
                 
                 <div class="flex flex-wrap gap-4">
                     <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" id="animalVacinado" class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500">
-                        <span class="text-gray-800"><i class="fas fa-syringe mr-1 text-green-600"></i>Vacinado</span>
+                        <input type="checkbox" id="frutaOrganico" class="w-5 h-5 text-orange-600 rounded focus:ring-2 focus:ring-orange-500">
+                        <span class="text-gray-800"><i class="fas fa-leaf mr-1 text-green-600"></i>Orgânico</span>
                     </label>
                     
                     <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" id="animalCastrado" class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500">
-                        <span class="text-gray-800"><i class="fas fa-cut mr-1 text-blue-600"></i>Castrado</span>
+                        <input type="checkbox" id="frutaPromo" class="w-5 h-5 text-orange-600 rounded focus:ring-2 focus:ring-orange-500">
+                        <span class="text-gray-800"><i class="fas fa-tag mr-1 text-red-600"></i>Em Promoção</span>
                     </label>
                     
                     <label class="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" id="animalDisponivel" checked class="w-5 h-5 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500">
-                        <span class="text-gray-800"><i class="fas fa-check-circle mr-1 text-purple-600"></i>Disponível para Adoção</span>
+                        <input type="checkbox" id="frutaDisponivel" checked class="w-5 h-5 text-orange-600 rounded focus:ring-2 focus:ring-orange-500">
+                        <span class="text-gray-800"><i class="fas fa-check-circle mr-1 text-green-600"></i>Disponível</span>
                     </label>
                 </div>
                 
-                <div class="flex gap-4 pt-4">
-                    <button type="button" onclick="closeAnimalModal()" 
-                        class="flex-1 glass hover:bg-white hover:bg-opacity-20 text-gray-800 px-6 py-3 rounded-lg font-semibold transition duration-200">
+                <div class="flex gap-4 pt-4 border-t-2 border-gray-200">
+                    <button type="button" onclick="closeFrutaModal()" 
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold transition duration-200">
                         Cancelar
                     </button>
                     <button type="submit" 
-                        class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
+                        class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
                         <i class="fas fa-save mr-2"></i>Salvar
                     </button>
                 </div>
@@ -319,106 +500,93 @@
         </div>
     </div>
 
-    <!-- Modal - Adoção (Continuação no próximo arquivo) -->
-    <div id="adocaoModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div class="bg-gradient-to-r from-pink-600 to-red-600 p-6 rounded-t-2xl">
+    <!-- Modal - Pedido -->
+    <div id="pedidoModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div class="bg-gradient-to-r from-orange-600 to-orange-500 p-6 rounded-t-2xl">
                 <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-bold text-white">Formulário de Adoção</h2>
-                    <button onclick="closeAdocaoModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full w-10 h-10 flex items-center justify-center transition">
+                    <h2 id="pedidoModalTitle" class="text-2xl font-bold text-white">Fazer Pedido</h2>
+                    <button onclick="closePedidoModal()" class="text-white hover:bg-white hover:bg-opacity-20 rounded-full w-10 h-10 flex items-center justify-center transition">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
             </div>
             
-            <form id="adocaoForm" class="p-6 space-y-4">
-                <input type="hidden" id="adocaoAnimalId">
+            <form id="pedidoForm" class="p-6 space-y-4">
+                <input type="hidden" id="pedidoFrutaId">
                 
-                <div class="glass rounded-lg p-4 mb-4">
-                    <label class="block text-gray-800 font-semibold mb-2">Animal Selecionado</label>
-                    <div id="selectedAnimalInfo" class="text-indigo-900 font-semibold"></div>
-                </div>
-                
-                <div>
-                    <label for="adocaoEndereco" class="block text-gray-800 font-semibold mb-2">
-                        <i class="fas fa-map-marker-alt mr-2"></i>Endereço Completo *
-                    </label>
-                    <input type="text" id="adocaoEndereco" required 
-                        class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-pink-500 focus:border-transparent" 
-                        placeholder="Rua, número, bairro, cidade">
+                <div class="bg-orange-50 rounded-lg p-4 mb-4 border-2 border-orange-200">
+                    <label class="block text-gray-800 font-semibold mb-2">Fruta Selecionada</label>
+                    <div id="selectedFrutaInfo" class="text-orange-900 font-semibold text-lg"></div>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="adocaoTipoResidencia" class="block text-gray-800 font-semibold mb-2">
-                            <i class="fas fa-home mr-2"></i>Tipo de Residência *
+                        <label for="pedidoQuantidade" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-shopping-bag mr-2 text-orange-600"></i>Quantidade (Kg) *
                         </label>
-                        <select id="adocaoTipoResidencia" required 
-                            class="w-full px-4 py-2 glass rounded-lg text-gray-800 focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                            <option value="">Selecione...</option>
-                            <option value="Casa">Casa</option>
-                            <option value="Apartamento">Apartamento</option>
-                        </select>
+                        <input type="number" id="pedidoQuantidade" required step="0.1" min="0.1" 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                            placeholder="1">
                     </div>
                     
-                    <div class="flex items-center space-x-4 pt-8">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" id="adocaoTemQuintal" class="w-5 h-5 text-pink-600 rounded focus:ring-2 focus:ring-pink-500">
-                            <span class="text-gray-800"><i class="fas fa-tree mr-1"></i>Possui Quintal</span>
+                    <div>
+                        <label for="pedidoTotal" class="block text-gray-800 font-semibold mb-2">
+                            <i class="fas fa-dollar-sign mr-2 text-yellow-600"></i>Total (R$)
                         </label>
+                        <input type="text" id="pedidoTotal" readonly 
+                            class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 bg-gray-50" 
+                            placeholder="0.00">
                     </div>
                 </div>
                 
-                <label class="flex items-center space-x-2 cursor-pointer">
-                    <input type="checkbox" id="adocaoPossuiOutrosPets" class="w-5 h-5 text-pink-600 rounded focus:ring-2 focus:ring-pink-500">
-                    <span class="text-gray-800"><i class="fas fa-paw mr-1"></i>Possui Outros Pets</span>
-                </label>
-                
                 <div>
-                    <label for="adocaoMotivo" class="block text-gray-800 font-semibold mb-2">
-                        <i class="fas fa-heart mr-2"></i>Por que deseja adotar? *
+                    <label for="pedidoEndereco" class="block text-gray-800 font-semibold mb-2">
+                        <i class="fas fa-map-marker-alt mr-2 text-red-600"></i>Endereço de Entrega *
                     </label>
-                    <textarea id="adocaoMotivo" required rows="3" 
-                        class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-pink-500 focus:border-transparent" 
-                        placeholder="Conte-nos o motivo..."></textarea>
+                    <input type="text" id="pedidoEndereco" required 
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                        placeholder="Rua, número, bairro, cidade">
                 </div>
                 
                 <div>
-                    <label for="adocaoExperiencia" class="block text-gray-800 font-semibold mb-2">
-                        <i class="fas fa-user-check mr-2"></i>Experiência com Pets
+                    <label for="pedidoTelefone" class="block text-gray-800 font-semibold mb-2">
+                        <i class="fas fa-phone mr-2 text-blue-600"></i>Telefone para Contato
                     </label>
-                    <textarea id="adocaoExperiencia" rows="3" 
-                        class="w-full px-4 py-2 glass rounded-lg text-gray-800 placeholder-gray-600 focus:ring-2 focus:ring-pink-500 focus:border-transparent" 
-                        placeholder="Já teve pets antes? Conte sua experiência..."></textarea>
+                    <input type="tel" id="pedidoTelefone" 
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                        placeholder="(11) 9XXXX-XXXX">
+                </div>
+
+                <div>
+                    <label for="pedidoDataEntrega" class="block text-gray-800 font-semibold mb-2">
+                        <i class="fas fa-calendar mr-2 text-purple-600"></i>Data de Entrega Desejada
+                    </label>
+                    <input type="date" id="pedidoDataEntrega" 
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 focus:outline-none focus:border-orange-500">
                 </div>
                 
-                <div class="flex gap-4 pt-4">
-                    <button type="button" onclick="closeAdocaoModal()" 
-                        class="flex-1 glass hover:bg-white hover:bg-opacity-20 text-gray-800 px-6 py-3 rounded-lg font-semibold transition duration-200">
+                <div>
+                    <label for="pedidoObservacoes" class="block text-gray-800 font-semibold mb-2">
+                        <i class="fas fa-note-sticky mr-2 text-yellow-600"></i>Observações
+                    </label>
+                    <textarea id="pedidoObservacoes" rows="2" 
+                        class="w-full px-4 py-2 rounded-lg border-2 border-gray-200 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-orange-500" 
+                        placeholder="Alguma observação especial?"></textarea>
+                </div>
+                
+                <div class="flex gap-4 pt-4 border-t-2 border-gray-200">
+                    <button type="button" onclick="closePedidoModal()" 
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-semibold transition duration-200">
                         Cancelar
                     </button>
                     <button type="submit" 
-                        class="flex-1 bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
-                        <i class="fas fa-paper-plane mr-2"></i>Enviar Formulário
+                        class="flex-1 bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-semibold transition duration-200">
+                        <i class="fas fa-check-circle mr-2"></i>Confirmar Pedido
                     </button>
                 </div>
-            </form>
         </div>
     </div>
-
-    <style>
-        .tab-btn {
-            color: white;
-            background: transparent;
-        }
-        .tab-btn.active {
-            background: white;
-            color: #4f46e5;
-        }
-        .tab-btn:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.2);
-        }
-    </style>
 
     <script src="/js/dashboard.js"></script>
 </body>

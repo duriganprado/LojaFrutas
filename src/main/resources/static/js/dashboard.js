@@ -1,12 +1,12 @@
 let currentUser = null;
-let allAnimals = [];
-let allFormularios = [];
-let currentAnimalImage = null;
+let allFrutas = [];
+let allPedidos = [];
+let currentFrutaImage = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAuth();
-    initializeTabs();
+    initializeNavigation();
     initializeFilters();
     initializeImagePreview();
 });
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function checkAuth() {
     try {
         console.log('Checking authentication...');
-        const response = await fetch('/api/usuarios/me');
+        const response = await fetch('/api/clientes/me');
         console.log('Auth response status:', response.status);
         
         if (!response.ok) {
@@ -28,8 +28,8 @@ async function checkAuth() {
         console.log('Current user:', currentUser);
         document.getElementById('userNameDisplay').textContent = currentUser.nome;
         
-        await loadAnimals();
-        await loadFormularios();
+        await loadFrutas();
+        await loadPedidos();
     } catch (error) {
         console.error('Auth error:', error);
         window.location.href = '/login';
@@ -59,101 +59,203 @@ async function logout() {
 }
 
 // Tabs functionality
-function initializeTabs() {
-    const tabButtons = document.querySelectorAll('.tab-btn');
+function initializeNavigation() {
+    const navItems = document.querySelectorAll('.nav-item');
     
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
+    // Set first item as active and show first section
+    const firstSection = document.querySelector('.section');
+    if (firstSection) {
+        firstSection.classList.remove('hidden');
+    }
+    
+    navItems.forEach(item => {
+        // Skip logout button
+        if (item.textContent.includes('Sair')) return;
+        
+        item.addEventListener('click', () => {
+            const section = item.getAttribute('data-section');
+            if (!section) return;
             
-            button.classList.add('active');
-            const tabName = button.getAttribute('data-tab');
-            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            // Remove active from all nav items
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                if (nav.getAttribute('data-section')) {
+                    nav.classList.remove('active');
+                }
+            });
+            item.classList.add('active');
             
-            if (tabName === 'adocao') loadAnimaisDisponiveis();
-            else if (tabName === 'formularios') loadFormularios();
+            // Hide all sections with animation
+            document.querySelectorAll('.section').forEach(sec => sec.classList.add('hidden'));
+            
+            // Show selected section with animation
+            const selectedSection = document.getElementById(`${section}-section`);
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+                
+                // Load data when section is shown
+                if (section === 'frutas') loadFrutas();
+                else if (section === 'catalogo') displayCatalogo(allFrutas);
+                else if (section === 'pedidos') loadPedidos();
+            }
         });
     });
 }
 
 // Initialize filters
 function initializeFilters() {
-    document.getElementById('searchAnimal').addEventListener('input', filterAnimals);
-    document.getElementById('filterEspecie').addEventListener('change', filterAnimals);
+    const searchInput = document.getElementById('searchFruta');
+    const filterCategoria = document.getElementById('filterCategoria');
+    const searchCatalogo = document.getElementById('searchFrutaCatalogo');
+    const filterCategoriaCatalogo = document.getElementById('filterCategoriaCatalogo');
+    
+    if (searchInput) searchInput.addEventListener('input', filterFrutas);
+    if (filterCategoria) filterCategoria.addEventListener('change', filterFrutas);
+    if (searchCatalogo) searchCatalogo.addEventListener('input', filterCatalogo);
+    if (filterCategoriaCatalogo) filterCategoriaCatalogo.addEventListener('change', filterCatalogo);
 }
 
-// Filter animals
-function filterAnimals() {
-    const search = document.getElementById('searchAnimal').value.toLowerCase();
-    const especie = document.getElementById('filterEspecie').value;
+// Filter frutas
+function filterFrutas() {
+    const search = document.getElementById('searchFruta')?.value?.toLowerCase() || '';
+    const categoria = document.getElementById('filterCategoria')?.value || '';
     
-    const filtered = allAnimals.filter(animal => {
-        const matchSearch = animal.nome.toLowerCase().includes(search);
-        const matchEspecie = !especie || animal.especie === especie;
-        return matchSearch && matchEspecie;
+    const filtered = allFrutas.filter(fruta => {
+        const matchSearch = fruta.nome.toLowerCase().includes(search);
+        const matchCategoria = !categoria || fruta.categoria === categoria;
+        return matchSearch && matchCategoria;
     });
     
-    displayAnimals(filtered);
+    displayFrutas(filtered);
 }
 
-// Load all animals
-async function loadAnimals() {
+// Filter catalogo
+function filterCatalogo() {
+    const search = document.getElementById('searchFrutaCatalogo')?.value?.toLowerCase() || '';
+    const categoria = document.getElementById('filterCategoriaCatalogo')?.value || '';
+    
+    const filtered = allFrutas.filter(fruta => {
+        const matchSearch = fruta.nome.toLowerCase().includes(search);
+        const matchCategoria = !categoria || fruta.categoria === categoria;
+        const matchDisponivel = fruta.disponivel;
+        return matchSearch && matchCategoria && matchDisponivel;
+    });
+    
+    displayCatalogo(filtered);
+}
+
+// Load all frutas
+async function loadFrutas() {
     try {
-        const response = await fetch('/api/animals');
+        console.log('Carregando frutas...');
+        const response = await fetch('/api/frutas');
         if (response.ok) {
-            allAnimals = await response.json();
-            displayAnimals(allAnimals);
+            allFrutas = await response.json();
+            console.log('Frutas carregadas:', allFrutas);
+            displayFrutas(allFrutas);
+        } else {
+            console.error('Erro ao carregar frutas:', response.statusText);
         }
     } catch (error) {
-        console.error('Erro ao carregar animais:', error);
+        console.error('Erro ao carregar frutas:', error);
     }
 }
 
-// Display animals
-function displayAnimals(animals) {
-    const grid = document.getElementById('animalsGrid');
+// Display catalogo (user shopping view)
+function displayCatalogo(frutas) {
+    const grid = document.getElementById('catalogoGrid');
     
-    if (animals.length === 0) {
+    if (!grid) return;
+    
+    // Filter only available frutas
+    const availableFrutas = frutas.filter(f => f.disponivel);
+    
+    if (availableFrutas.length === 0) {
         grid.innerHTML = `
-            <div class="col-span-full text-center py-12 text-white">
-                <i class="fas fa-paw text-6xl mb-4 opacity-50"></i>
-                <p class="text-xl">Nenhum animal encontrado</p>
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-apple-alt text-6xl mb-4 opacity-30"></i>
+                <p class="text-xl">Nenhuma fruta disponível no momento</p>
             </div>
         `;
         return;
     }
     
-    grid.innerHTML = animals.map(animal => `
-        <div class="glass-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300">
-            <div class="h-48 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center overflow-hidden">
-                ${animal.fotoUrl 
-                    ? `<img src="${animal.fotoUrl}" alt="${animal.nome}" class="w-full h-full object-cover">` 
-                    : `<i class="fas fa-${getAnimalIconClass(animal.especie)} text-6xl text-indigo-300"></i>`
+    grid.innerHTML = availableFrutas.map(fruta => `
+        <div class="bg-white border-2 border-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition duration-300">
+            <div class="h-32 bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center overflow-hidden">
+                ${fruta.fotoUrl 
+                    ? `<img src="${fruta.fotoUrl}" alt="${fruta.nome}" class="w-full h-full object-cover">` 
+                    : `<i class="fas fa-apple-alt text-4xl text-orange-300"></i>`
                 }
             </div>
-            <div class="p-4 bg-white bg-opacity-60">
-                <h3 class="text-xl font-bold text-gray-900 mb-2">${animal.nome}</h3>
-                <div class="text-sm text-gray-800 space-y-1 mb-3">
-                    <p><i class="fas fa-paw mr-2 text-indigo-600"></i><strong>Espécie:</strong> ${animal.especie}</p>
-                    ${animal.raca ? `<p><i class="fas fa-dna mr-2 text-purple-600"></i><strong>Raça:</strong> ${animal.raca}</p>` : ''}
-                    <p><i class="fas fa-birthday-cake mr-2 text-pink-600"></i><strong>Idade:</strong> ${animal.idade} ${animal.idade === 1 ? 'ano' : 'anos'}</p>
-                    ${animal.sexo ? `<p><i class="fas fa-venus-mars mr-2 text-blue-600"></i><strong>Sexo:</strong> ${animal.sexo}</p>` : ''}
+            <div class="p-3 bg-white">
+                <h3 class="text-lg font-bold text-gray-900 truncate">${fruta.nome}</h3>
+                <p class="text-sm text-gray-600 mb-2">${fruta.categoria}</p>
+                
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xl font-bold text-orange-600">R$ ${(fruta.preco || 0).toFixed(2)}</span>
+                    <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">${fruta.estoque} kg</span>
                 </div>
-                ${animal.descricao ? `<p class="text-sm text-gray-700 mb-3 line-clamp-2">${animal.descricao}</p>` : ''}
-                <div class="flex flex-wrap gap-2 mb-4">
-                    ${animal.vacinado ? '<span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full"><i class="fas fa-syringe mr-1"></i>Vacinado</span>' : ''}
-                    ${animal.castrado ? '<span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full"><i class="fas fa-cut mr-1"></i>Castrado</span>' : ''}
-                    ${animal.disponivelAdocao 
-                        ? '<span class="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-semibold"><i class="fas fa-check mr-1"></i>Disponível</span>' 
-                        : '<span class="px-2 py-1 bg-gray-200 text-gray-800 text-xs rounded-full font-semibold"><i class="fas fa-times mr-1"></i>Adotado</span>'}
+                
+                ${fruta.descricao ? `<p class="text-xs text-gray-600 mb-2 line-clamp-2">${fruta.descricao}</p>` : ''}
+                
+                <div class="flex flex-wrap gap-1 mb-3">
+                    ${fruta.organico ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded"><i class="fas fa-leaf"></i> Org</span>' : ''}
+                    ${fruta.emPromocao ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded"><i class="fas fa-tag"></i> Promo</span>' : ''}
                 </div>
+                
+                <button onclick="openPedidoModal(${fruta.id}, '${fruta.nome.replace(/'/g, "\\'")}', ${fruta.preco})" 
+                        class="w-full bg-orange-600 hover:bg-orange-700 text-white py-2 rounded font-semibold transition">
+                    <i class="fas fa-shopping-cart mr-2"></i>Comprar
+                </button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Display frutas
+function displayFrutas(frutas) {
+    const grid = document.getElementById('frutasGrid');
+    
+    if (!grid) return;
+    
+    if (frutas.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-12 text-gray-500">
+                <i class="fas fa-apple-alt text-6xl mb-4 opacity-30"></i>
+                <p class="text-xl">Nenhuma fruta encontrada</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = frutas.map(fruta => `
+        <div class="bg-white border-2 border-gray-100 rounded-lg overflow-hidden hover:shadow-lg transition duration-300">
+            <div class="h-32 bg-gradient-to-br from-orange-100 to-yellow-100 flex items-center justify-center overflow-hidden">
+                ${fruta.fotoUrl 
+                    ? `<img src="${fruta.fotoUrl}" alt="${fruta.nome}" class="w-full h-full object-cover">` 
+                    : `<i class="fas fa-apple-alt text-4xl text-orange-300"></i>`
+                }
+            </div>
+            <div class="p-3 bg-white">
+                <h3 class="text-lg font-bold text-gray-900 truncate">${fruta.nome}</h3>
+                <p class="text-sm text-gray-600 mb-2">${fruta.categoria}</p>
+                
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xl font-bold text-orange-600">R$ ${(fruta.preco || 0).toFixed(2)}</span>
+                    <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">${fruta.estoque} kg</span>
+                </div>
+                
+                <div class="flex flex-wrap gap-1 mb-3">
+                    ${fruta.organico ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded"><i class="fas fa-leaf"></i> Org</span>' : ''}
+                    ${fruta.emPromocao ? '<span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded"><i class="fas fa-tag"></i> Promo</span>' : ''}
+                </div>
+                
                 <div class="flex gap-2">
-                    <button onclick="editAnimal(${animal.id})" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm transition">
-                        <i class="fas fa-edit mr-1"></i>Editar
+                    <button onclick="editFruta(${fruta.id})" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-1 text-xs rounded font-semibold transition">
+                        <i class="fas fa-edit"></i>
                     </button>
-                    <button onclick="deleteAnimal(${animal.id})" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-sm transition">
-                        <i class="fas fa-trash mr-1"></i>Excluir
+                    <button onclick="deleteFruta(${fruta.id})" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-1 text-xs rounded font-semibold transition">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </div>
@@ -161,25 +263,15 @@ function displayAnimals(animals) {
     `).join('');
 }
 
-// Get animal icon class
-function getAnimalIconClass(especie) {
-    const icons = {
-        'Cachorro': 'dog',
-        'Gato': 'cat',
-        'Pássaro': 'dove',
-        'Coelho': 'rabbit',
-        'Outro': 'paw'
-    };
-    return icons[especie] || 'paw';
-}
-
 // Initialize image preview
 function initializeImagePreview() {
-    const input = document.getElementById('animalFoto');
+    const input = document.getElementById('frutaFoto');
+    if (!input) return;
+    
     input.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            currentAnimalImage = file;
+            currentFrutaImage = file;
             const reader = new FileReader();
             reader.onload = (event) => {
                 document.getElementById('imagePreview').innerHTML = 
@@ -190,301 +282,313 @@ function initializeImagePreview() {
     });
 }
 
-// Animal Modal
-function openAnimalModal(animalId = null) {
-    const modal = document.getElementById('animalModal');
-    const form = document.getElementById('animalForm');
+// Fruta Modal
+function openFrutaModal(frutaId = null) {
+    const modal = document.getElementById('frutaModal');
+    if (!modal) return;
+    
+    const form = document.getElementById('frutaForm');
     const title = document.getElementById('modalTitle');
     
     form.reset();
-    currentAnimalImage = null;
-    document.getElementById('imagePreview').innerHTML = '<i class="fas fa-paw text-6xl text-gray-300"></i>';
+    currentFrutaImage = null;
+    const preview = document.getElementById('imagePreview');
+    if (preview) preview.innerHTML = '<i class="fas fa-apple-alt text-6xl text-gray-300"></i>';
     
-    if (animalId) {
-        title.textContent = 'Editar Animal';
-        const animal = allAnimals.find(a => a.id === animalId);
-        if (animal) {
-            document.getElementById('animalId').value = animal.id;
-            document.getElementById('animalNome').value = animal.nome;
-            document.getElementById('animalEspecie').value = animal.especie;
-            document.getElementById('animalRaca').value = animal.raca || '';
-            document.getElementById('animalIdade').value = animal.idade;
-            document.getElementById('animalSexo').value = animal.sexo || '';
-            document.getElementById('animalPorte').value = animal.porte || '';
-            document.getElementById('animalCor').value = animal.cor || '';
-            document.getElementById('animalDescricao').value = animal.descricao || '';
-            document.getElementById('animalVacinado').checked = animal.vacinado;
-            document.getElementById('animalCastrado').checked = animal.castrado;
-            document.getElementById('animalDisponivel').checked = animal.disponivelAdocao;
+    if (frutaId) {
+        title.textContent = 'Editar Fruta';
+        const fruta = allFrutas.find(a => a.id === frutaId);
+        if (fruta) {
+            document.getElementById('frutaId').value = fruta.id;
+            document.getElementById('frutaNome').value = fruta.nome;
+            document.getElementById('frutaCategoria').value = fruta.categoria;
+            document.getElementById('frutaOrigem').value = fruta.origem || '';
+            document.getElementById('frutaPreco').value = fruta.preco || '';
+            document.getElementById('frutaEstoque').value = fruta.estoque || '';
+            document.getElementById('frutaCor').value = fruta.cor || '';
+            document.getElementById('frutaSabor').value = fruta.sabor || '';
+            document.getElementById('frutaUnidade').value = fruta.unidadeMedida || '';
+            document.getElementById('frutaDescricao').value = fruta.descricao || '';
+            document.getElementById('frutaOrganico').checked = fruta.organico;
+            document.getElementById('frutaPromo').checked = fruta.emPromocao;
+            document.getElementById('frutaDisponivel').checked = fruta.disponivel;
             
-            if (animal.fotoUrl) {
-                document.getElementById('imagePreview').innerHTML = 
-                    `<img src="${animal.fotoUrl}" class="w-full h-full object-cover">`;
+            if (fruta.fotoUrl && preview) {
+                preview.innerHTML = 
+                    `<img src="${fruta.fotoUrl}" class="w-full h-full object-cover">`;
             }
         }
     } else {
-        title.textContent = 'Adicionar Animal';
-        document.getElementById('animalId').value = '';
+        title.textContent = 'Adicionar Fruta';
+        document.getElementById('frutaId').value = '';
     }
     
     modal.classList.remove('hidden');
 }
 
-function closeAnimalModal() {
-    document.getElementById('animalModal').classList.add('hidden');
+function closeFrutaModal() {
+    const modal = document.getElementById('frutaModal');
+    if (modal) modal.classList.add('hidden');
 }
 
-// Handle animal form submit
-document.getElementById('animalForm')?.addEventListener('submit', async (e) => {
+// Handle fruta form submit
+document.getElementById('frutaForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    const animalId = document.getElementById('animalId').value;
-    const animalData = {
-        nome: document.getElementById('animalNome').value,
-        especie: document.getElementById('animalEspecie').value,
-        raca: document.getElementById('animalRaca').value || null,
-        idade: Number.parseInt(document.getElementById('animalIdade').value),
-        sexo: document.getElementById('animalSexo').value || null,
-        porte: document.getElementById('animalPorte').value || null,
-        cor: document.getElementById('animalCor').value || null,
-        descricao: document.getElementById('animalDescricao').value || null,
-        vacinado: document.getElementById('animalVacinado').checked,
-        castrado: document.getElementById('animalCastrado').checked,
-        disponivelAdocao: document.getElementById('animalDisponivel').checked
+    const frutaId = document.getElementById('frutaId').value;
+    const frutaData = {
+        nome: document.getElementById('frutaNome').value,
+        categoria: document.getElementById('frutaCategoria').value,
+        origem: document.getElementById('frutaOrigem').value || null,
+        preco: parseFloat(document.getElementById('frutaPreco').value),
+        estoque: parseInt(document.getElementById('frutaEstoque').value),
+        cor: document.getElementById('frutaCor').value || null,
+        sabor: document.getElementById('frutaSabor').value || null,
+        unidadeMedida: document.getElementById('frutaUnidade').value || null,
+        descricao: document.getElementById('frutaDescricao').value || null,
+        organico: document.getElementById('frutaOrganico').checked,
+        emPromocao: document.getElementById('frutaPromo').checked,
+        disponivel: document.getElementById('frutaDisponivel').checked
     };
     
     try {
-        const url = animalId ? `/api/animals/${animalId}` : '/api/animals';
-        const method = animalId ? 'PUT' : 'POST';
+        const url = frutaId ? `/api/frutas/${frutaId}` : '/api/frutas';
+        const method = frutaId ? 'PUT' : 'POST';
         
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(animalData)
+            body: JSON.stringify(frutaData)
         });
         
         if (response.ok) {
             const result = await response.json();
-            const savedAnimal = result.animal || result;
+            const savedFruta = result.fruta || result;
             
             // Upload image if selected
-            if (currentAnimalImage) {
-                await uploadAnimalImage(savedAnimal.id, currentAnimalImage);
+            if (currentFrutaImage) {
+                await uploadFrutaImage(savedFruta.id, currentFrutaImage);
             }
             
-            closeAnimalModal();
-            await loadAnimals();
-            showAlert('success', animalId ? 'Animal atualizado com sucesso!' : 'Animal cadastrado com sucesso!');
+            closeFrutaModal();
+            await loadFrutas();
+            showAlert('success', frutaId ? 'Fruta atualizada com sucesso!' : 'Fruta cadastrada com sucesso!');
         } else {
-            showAlert('error', 'Erro ao salvar animal');
+            const error = await response.json();
+            showAlert('error', error.message || 'Erro ao salvar fruta');
         }
     } catch (error) {
         console.error('Erro:', error);
-        showAlert('error', 'Erro ao salvar animal');
+        showAlert('error', 'Erro ao salvar fruta');
     }
 });
 
-// Upload animal image
-async function uploadAnimalImage(animalId, file) {
+// Upload fruta image
+async function uploadFrutaImage(frutaId, file) {
     const formData = new FormData();
     formData.append('file', file);
     
     try {
-        const response = await fetch(`/api/animals/${animalId}/upload-image`, {
+        console.log('Iniciando upload de imagem para fruta:', frutaId);
+        const response = await fetch(`/api/frutas/${frutaId}/upload-imagem`, {
             method: 'POST',
             body: formData
         });
         
         if (!response.ok) {
-            console.error('Erro ao fazer upload da imagem');
+            const errorText = await response.text();
+            console.error('Erro ao fazer upload da imagem:', response.status, errorText);
+            showAlert('error', 'Erro ao fazer upload da imagem: ' + response.status);
+            return false;
         }
+        
+        console.log('Upload de imagem concluído com sucesso');
+        return true;
     } catch (error) {
         console.error('Erro no upload:', error);
+        showAlert('error', 'Erro ao fazer upload da imagem: ' + error.message);
+        return false;
     }
 }
 
-// Edit animal
-function editAnimal(id) {
-    openAnimalModal(id);
+// Edit fruta
+function editFruta(id) {
+    openFrutaModal(id);
 }
 
-// Delete animal
-async function deleteAnimal(id) {
-    if (!confirm('Tem certeza que deseja excluir este animal?')) return;
+// Delete fruta
+async function deleteFruta(id) {
+    if (!confirm('Tem certeza que deseja excluir esta fruta?')) return;
     
     try {
-        const response = await fetch(`/api/animals/${id}`, {
+        const response = await fetch(`/api/frutas/${id}`, {
             method: 'DELETE'
         });
         
         if (response.ok) {
-            await loadAnimals();
-            showAlert('success', 'Animal excluído com sucesso!');
+            await loadFrutas();
+            showAlert('success', 'Fruta excluída com sucesso!');
         } else {
-            showAlert('error', 'Erro ao excluir animal');
+            showAlert('error', 'Erro ao excluir fruta');
         }
     } catch (error) {
         console.error('Erro:', error);
-        showAlert('error', 'Erro ao excluir animal');
+        showAlert('error', 'Erro ao excluir fruta');
     }
 }
 
-// Load animals available for adoption
-async function loadAnimaisDisponiveis() {
-    const disponiveis = allAnimals.filter(a => a.disponivelAdocao);
-    const grid = document.getElementById('adocaoGrid');
-    
-    if (disponiveis.length === 0) {
-        grid.innerHTML = `
-            <div class="col-span-full text-center py-12 text-white">
-                <i class="fas fa-heart text-6xl mb-4 opacity-50"></i>
-                <p class="text-xl">Nenhum animal disponível para adoção no momento</p>
-            </div>
-        `;
-        return;
-    }
-    
-    grid.innerHTML = disponiveis.map(animal => `
-        <div class="glass-card rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition duration-300">
-            <div class="h-48 bg-gradient-to-br from-pink-100 to-red-100 flex items-center justify-center overflow-hidden">
-                ${animal.fotoUrl 
-                    ? `<img src="${animal.fotoUrl}" alt="${animal.nome}" class="w-full h-full object-cover">` 
-                    : `<i class="fas fa-${getAnimalIconClass(animal.especie)} text-6xl text-pink-300"></i>`
-                }
-            </div>
-            <div class="p-4 bg-white bg-opacity-60">
-                <h3 class="text-xl font-bold text-gray-900 mb-2">${animal.nome}</h3>
-                <div class="text-sm text-gray-800 space-y-1 mb-3">
-                    <p><i class="fas fa-paw mr-2 text-pink-600"></i>${animal.especie}${animal.raca ? ` - ${animal.raca}` : ''}</p>
-                    <p><i class="fas fa-birthday-cake mr-2 text-red-600"></i>${animal.idade} ${animal.idade === 1 ? 'ano' : 'anos'}</p>
-                </div>
-                ${animal.descricao ? `<p class="text-sm text-gray-700 mb-3">${animal.descricao}</p>` : ''}
-                <button onclick="openAdocaoModal(${animal.id})" 
-                    class="w-full bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg font-semibold transition">
-                    <i class="fas fa-heart mr-2"></i>Adotar
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
-
-// Adoption Modal
-function openAdocaoModal(animalId) {
-    const modal = document.getElementById('adocaoModal');
-    const animal = allAnimals.find(a => a.id === animalId);
-    
-    if (animal) {
-        document.getElementById('adocaoAnimalId').value = animal.id;
-        document.getElementById('selectedAnimalInfo').textContent = `${animal.nome} - ${animal.especie}`;
-        document.getElementById('adocaoForm').reset();
-        modal.classList.remove('hidden');
-    }
-}
-
-function closeAdocaoModal() {
-    document.getElementById('adocaoModal').classList.add('hidden');
-}
-
-// Handle adoption form submit
-document.getElementById('adocaoForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const animalId = Number.parseInt(document.getElementById('adocaoAnimalId').value);
-    const formData = {
-        animalId: animalId,
-        nome: document.getElementById('adocaoNome')?.value || currentUser.nome || '',
-        email: document.getElementById('adocaoEmail')?.value || currentUser.email || '',
-        telefone: document.getElementById('adocaoTelefone')?.value || '',
-        endereco: document.getElementById('adocaoEndereco').value,
-        motivoAdocao: document.getElementById('adocaoMotivo').value,
-        experienciaAnimais: document.getElementById('adocaoExperiencia').value || ''
-    };
-    
+// Load user pedidos
+async function loadPedidos() {
     try {
-        const response = await fetch('/api/formularios', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-        });
-        
-        if (response.ok) {
-            closeAdocaoModal();
-            showAlert('success', 'Formulário de adoção enviado com sucesso!');
-            await loadFormularios();
-        } else {
-            const error = await response.json();
-            showAlert('error', error.message || 'Erro ao enviar formulário');
-        }
-    } catch (error) {
-        console.error('Erro:', error);
-        showAlert('error', 'Erro ao enviar formulário');
-    }
-});
-
-// Load user formularios
-async function loadFormularios() {
-    try {
-        console.log('Carregando formulários...');
-        const response = await fetch('/api/formularios/meus');
+        console.log('Carregando pedidos...');
+        const response = await fetch('/api/pedidos');
         console.log('Response status:', response.status);
         if (response.ok) {
-            allFormularios = await response.json();
-            console.log('Formulários carregados:', allFormularios);
-            displayFormularios();
+            allPedidos = await response.json();
+            console.log('Pedidos carregados:', allPedidos);
+            displayPedidos();
         } else {
-            console.error('Erro ao carregar formulários:', response.statusText);
+            console.error('Erro ao carregar pedidos:', response.statusText);
         }
     } catch (error) {
-        console.error('Erro ao carregar formulários:', error);
+        console.error('Erro ao carregar pedidos:', error);
     }
 }
 
-// Display formularios
-function displayFormularios() {
-    const lista = document.getElementById('formulariosLista');
+// Display pedidos
+function displayPedidos() {
+    const lista = document.getElementById('pedidosLista');
     
-    if (allFormularios.length === 0) {
+    if (!lista) return;
+    
+    if (allPedidos.length === 0) {
         lista.innerHTML = `
             <div class="text-center py-12 text-white">
-                <i class="fas fa-clipboard-list text-6xl mb-4 opacity-50"></i>
-                <p class="text-xl">Você ainda não enviou nenhum formulário de adoção</p>
+                <i class="fas fa-shopping-cart text-6xl mb-4 opacity-50"></i>
+                <p class="text-xl">Você ainda não fez nenhum pedido</p>
             </div>
         `;
         return;
     }
     
-    lista.innerHTML = allFormularios.map(form => {
+    lista.innerHTML = allPedidos.map(pedido => {
         const statusColors = {
             'PENDENTE': 'bg-yellow-100 text-yellow-800',
-            'APROVADO': 'bg-green-100 text-green-800',
-            'RECUSADO': 'bg-red-100 text-red-800',
-            'CANCELADO': 'glass text-gray-800'
+            'CONFIRMADO': 'bg-blue-100 text-blue-800',
+            'PREPARANDO': 'bg-purple-100 text-purple-800',
+            'ENTREGUE': 'bg-green-100 text-green-800',
+            'CANCELADO': 'bg-red-100 text-red-800'
         };
         
-        const dataSolicitacao = form.dataSolicitacao ? new Date(form.dataSolicitacao).toLocaleDateString('pt-BR') : 'N/A';
+        const dataPedido = pedido.dataPedido ? new Date(pedido.dataPedido).toLocaleDateString('pt-BR') : 'N/A';
+        const dataEntrega = pedido.dataEntrega ? new Date(pedido.dataEntrega).toLocaleDateString('pt-BR') : 'N/A';
         
         return `
-            <div class="glass-card rounded-xl p-6 shadow-lg">
-                <div class="flex justify-between items-start mb-4 bg-white bg-opacity-50 p-3 rounded-lg">
+            <div class="bg-white rounded-xl p-6 shadow-lg">
+                <div class="flex justify-between items-start mb-4 bg-orange-50 p-3 rounded-lg">
                     <div>
-                        <h3 class="text-xl font-bold text-gray-900">${form.animal ? form.animal.nome : 'Animal não encontrado'}</h3>
-                        <p class="text-gray-800">${form.animal ? form.animal.especie : ''} ${form.animal && form.animal.raca ? `- ${form.animal.raca}` : ''}</p>
+                        <h3 class="text-xl font-bold text-gray-900">Pedido #${pedido.id}</h3>
+                        <p class="text-gray-800">${pedido.fruta ? pedido.fruta.nome : 'Fruta não encontrada'}</p>
                     </div>
-                    <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusColors[form.status] || 'glass text-gray-800'}">
-                        ${form.status}
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold ${statusColors[pedido.status] || 'bg-gray-100 text-gray-800'}">
+                        ${pedido.status}
                     </span>
                 </div>
-                <div class="text-sm text-gray-800 space-y-2 bg-white bg-opacity-40 p-3 rounded-lg">
-                    <p><i class="fas fa-calendar mr-2"></i><strong>Data:</strong> ${dataSolicitacao}</p>
-                    <p><i class="fas fa-map-marker-alt mr-2 text-red-600"></i><strong>Endereço:</strong> ${form.endereco || 'N/A'}</p>
-                    ${form.tipoResidencia ? `<p><i class="fas fa-home mr-2 text-purple-600"></i><strong>Residência:</strong> ${form.tipoResidencia}</p>` : ''}
-                    ${form.motivoAdocao ? `<p><i class="fas fa-heart mr-2 text-pink-600"></i><strong>Motivo:</strong> ${form.motivoAdocao}</p>` : ''}
-                    ${form.observacoes ? `<p><i class="fas fa-comment mr-2 text-blue-600"></i><strong>Observações:</strong> ${form.observacoes}</p>` : ''}
+                <div class="text-sm text-gray-800 space-y-2 bg-orange-50 p-3 rounded-lg">
+                    <p><i class="fas fa-calendar mr-2"></i><strong>Data do Pedido:</strong> ${dataPedido}</p>
+                    <p><i class="fas fa-boxes mr-2 text-orange-600"></i><strong>Quantidade:</strong> ${pedido.quantidade}</p>
+                    <p><i class="fas fa-dollar-sign mr-2 text-yellow-600"></i><strong>Preço Unitário:</strong> R$ ${(pedido.precoUnitario || 0).toFixed(2)}</p>
+                    <p><i class="fas fa-map-marker-alt mr-2 text-red-600"></i><strong>Endereço:</strong> ${pedido.enderecoEntrega || 'N/A'}</p>
+                    <p><i class="fas fa-phone mr-2 text-blue-600"></i><strong>Telefone:</strong> ${pedido.telefoneEntrega || 'N/A'}</p>
+                    ${pedido.dataEntrega ? `<p><i class="fas fa-truck mr-2 text-purple-600"></i><strong>Entrega:</strong> ${dataEntrega}</p>` : ''}
+                    ${pedido.observacoes ? `<p><i class="fas fa-comment mr-2 text-blue-600"></i><strong>Observações:</strong> ${pedido.observacoes}</p>` : ''}
                 </div>
             </div>
         `;
     }).join('');
 }
+
+// Pedido Modal
+function openPedidoModal(frutaId = null, frutaNome = null, preco = null) {
+    const modal = document.getElementById('pedidoModal');
+    if (!modal) return;
+    
+    const form = document.getElementById('pedidoForm');
+    const title = document.getElementById('pedidoModalTitle');
+    
+    form.reset();
+    
+    if (frutaId) {
+        title.textContent = 'Fazer Pedido';
+        
+        // Se os parâmetros foram passados diretamente (do catálogo), use-os
+        if (frutaNome && preco !== null) {
+            document.getElementById('pedidoFrutaId').value = frutaId;
+            document.getElementById('selectedFrutaInfo').textContent = `${frutaNome} - R$ ${preco.toFixed(2)}`;
+        } else {
+            // Caso contrário, procure no array allFrutas
+            const fruta = allFrutas.find(a => a.id === frutaId);
+            if (fruta) {
+                document.getElementById('pedidoFrutaId').value = fruta.id;
+                document.getElementById('selectedFrutaInfo').textContent = `${fruta.nome} - R$ ${(fruta.preco || 0).toFixed(2)}`;
+            }
+        }
+        
+        document.getElementById('pedidoEndereco').value = '';
+        document.getElementById('pedidoTelefone').value = '';
+        document.getElementById('pedidoQuantidade').value = '1';
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function closePedidoModal() {
+    const modal = document.getElementById('pedidoModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+// Handle pedido form submit
+document.getElementById('pedidoForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const frutaId = Number.parseInt(document.getElementById('pedidoFrutaId').value);
+    const dataEntregaInput = document.getElementById('pedidoDataEntrega')?.value;
+    let dataEntregaDesejada = null;
+    
+    // Converter data para ISO 8601 com hora (2025-12-01 -> 2025-12-01T00:00:00)
+    if (dataEntregaInput) {
+        dataEntregaDesejada = dataEntregaInput + 'T00:00:00';
+    }
+    
+    const pedidoData = {
+        frutaId: frutaId,
+        quantidade: parseInt(document.getElementById('pedidoQuantidade').value),
+        enderecoEntrega: document.getElementById('pedidoEndereco').value,
+        telefoneEntrega: document.getElementById('pedidoTelefone').value,
+        dataEntregaDesejada: dataEntregaDesejada,
+        observacoes: document.getElementById('pedidoObservacoes')?.value || ''
+    };
+    
+    try {
+        const response = await fetch('/api/pedidos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(pedidoData)
+        });
+        
+        if (response.ok) {
+            closePedidoModal();
+            showAlert('success', 'Pedido criado com sucesso!');
+            await loadPedidos();
+        } else {
+            const error = await response.json();
+            showAlert('error', error.message || 'Erro ao criar pedido');
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        showAlert('error', 'Erro ao criar pedido');
+    }
+});
 
 // Show alert
 function showAlert(type, message) {

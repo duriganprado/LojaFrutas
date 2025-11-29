@@ -1,4 +1,4 @@
-// Register functionality
+// Register functionality for Fruta Shop
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -20,7 +20,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
         return;
     }
     
-    const usuario = {
+    const cliente = {
         nome,
         email,
         telefone,
@@ -28,12 +28,12 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     };
     
     try {
-        const response = await fetch('/api/usuarios/register', {
+        const response = await fetch('/api/clientes/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(usuario)
+            body: JSON.stringify(cliente)
         });
         
         const data = await response.json();
